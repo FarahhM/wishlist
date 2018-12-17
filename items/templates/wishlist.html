@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Wishlist{% endblock title %}
+{% block content %}
+
+<form action="{% url 'wishlist' %}" method="GET">
+        <input type="text" name='q' placeholder="Search Items" aria-label="Search" value="{{request.GET.q}}">
+        <input value= "Search"type="submit">
+</form>
+
+<div class="row">
+{% for item in favs %}
+<div class="col-sm-4 py-2">
+        <div class="card h-100">
+            <img class="card-img-top" height="55%" src="{{item.fav.image.url}}" alt="Card image cap">
+            <div class="card-body bg-light">
+                <h3 class="card-title">{{item.fav.name}}</h3>
+                <a href="{% url 'item-detail' item.fav.id %}" class="btn btn-outline-dark">More</a>
+               
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+{% endblock%} 

@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-
+{% block title %}List{% endblock title %}
 {% block content %}
-<form class="form-inline my-2 my-lg-0">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search Items" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+<form action="{% url 'item-list' %}" method="GET">
+        <input type="text" name='q' placeholder="Search Items" value="{{request.GET.q}}"aria-label="Search">
+        <input value= "Search"type="submit">
 </form>
 <div class="row">
 {% for item in items %}
@@ -13,10 +13,31 @@
             <div class="card-body bg-light">
                 <h3 class="card-title">{{item.name}}</h3>
                 <a href="{% url 'item-detail' item.id %}" class="btn btn-outline-dark">More</a>
+                <button class="btn btn-outline-light"><i id="wishlist-{{item.id}}" onclick="wishlist({{item.id}})"class="fas fa-star {% if item in wishlist %} text-warning {% endif %}"></i></button>
             </div>
         </div>
     </div>
-
 {% endfor %}
 </div>
+<script>
+ function wishlist(id){
+    var star_id= "#wishlist-"+id;
+    $.ajax({
+        type:"GET",
+        url:'/items/'+id+'/favorite/',
+        success: function(data){
+            if (data.action === "favorite"){
+                $(star_id).addClass('text-warning');
+            }
+            else{
+                $(star_id).removeClass('text-warning');
+            }
+        },
+        error: function(){
+            alert("Somthing went wrong!");
+        },
+    })      
+
+ }   
+</script>
 {% endblock%}

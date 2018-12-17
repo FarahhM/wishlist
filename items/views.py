@@ -1,12 +1,50 @@
 from django.shortcuts import render, redirect
-from items.models import Item
+from items.models import Item, FavoriteItem
 from .forms import UserRegisterForm, UserLoginForm
 from django.contrib.auth import login, logout, authenticate
-
+from django.http import JsonResponse
+from django.db.models import Q
 # Create your views here.
+
+def item_favorite(request, item_id):
+    item= Item.objects.get(id=item_id)
+    if request.user.is_anonymous:
+        return redirect ('user-login')
+    fav_obj, created = FavoriteItem.objects.get_or_create(fav=item, user=request.user)
+    if created:
+        action = "favorite"
+    else:
+        action = "unfavorite"
+        fav_obj.delete()
+
+    data = {
+    "action": action,
+    }
+    return JsonResponse(data)
+
+def wishlist(request):
+     fav_items= FavoriteItem.objects.filter(user=request.user)
+     query = request.GET.get('q')
+     if query:
+        fav_items=fav_items.filter(fav__name__contains=query)
+     context={
+        "favs":fav_items,
+     }
+     return render (request, "wishlist.html", context)
+
 def item_list(request):
+    items = Item.objects.all()
+    query = request.GET.get('q')
+    if query:
+        items=items.filter(name__contains=query)
+    
+    wishlist = []
+    if request.user.is_authenticated:
+        favs = FavoriteItem.objects.filter(user=request.user)
+        wishlist= [fav.fav for fav in favs]
     context = {
-        "items": Item.objects.all()
+        "items": items,
+        "wishlist": wishlist,
     }
     return render(request, 'item_list.html', context)
 
